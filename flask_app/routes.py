@@ -56,9 +56,8 @@ def deposit(api_key):
     if not account:
         return jsonify(UNAUTHORIZED),401
     amount=request.json['amount']
-    if not isinstance(amount,float) or amount<0:
-        return jsonify(BADREQUEST),400
-    account.deposit(amount)
+    
+    account.deposit(float(amount))
     account.save()
     return jsonify({"username": account.username,"balance":account.balance})
 
@@ -81,11 +80,11 @@ def sell(api_key):
         return jsonify(UNAUTHORIZED),401
     amount=request.json['amount']
     symbol=request.json['ticker']
-    if amount<0:
+    if int(amount)<0:
         return jsonify(BADREQUEST),400
-    account.sell(symbol,amount)
+    account.sell(symbol,int(amount))
     account.save()
-    return jsonify({"username": account.username,"shares:":amount,"ticker:":symbol,"balance":account.balance})
+    return jsonify({"username": account.username,"shares":amount,"ticker":symbol,"balance":account.balance})
 
 @app.route('/api/<api_key>/buy',methods=['PUT'])
 def buy(api_key):
@@ -96,11 +95,11 @@ def buy(api_key):
         return jsonify(UNAUTHORIZED),401
     amount=request.json['amount']
     symbol=request.json['ticker']
-    if amount<0:
+    if int(amount)<0:
         return jsonify(BADREQUEST),400
-    account.buy(symbol,amount)
+    account.buy(symbol,int(amount))
     account.save()
-    return jsonify({"username": account.username,"shares:":amount,"ticker:":symbol,"balance":account.balance})
+    return jsonify({"username": account.username,"shares":amount,"ticker":symbol,"balance":account.balance})
 
 @app.route('/api/<api_key>/stocks/viewall')
 def viewall(api_key):
@@ -126,11 +125,25 @@ def createaccount():
     account.save()
     return jsonify({"username": account.username,"apikey":account.api_key})
 
-@app.route('/api/viewapikey')
+@app.route('/api/viewapikey',methods=['POST'])
 def viewapikey():
     if not request.json or 'username' not in request.json or 'password' not in request.json:
+        print(request.json)
         return jsonify(BADREQUEST),400
     
     r=request.json
     account=Account.login(r['username'],r['password'])    
     return jsonify({"username": account.username,"apikey":account.api_key})
+
+@app.route('/api/<api_key>/stocks/searchall/<search>')
+def searchall(api_key,search):
+    account=Account.api_authenticate(api_key)
+    if not account:
+        return jsonify(UNAUTHORIZED),401
+    stocks=account.getallsearchprices(search)
+    
+    if stocks==False:
+        #stocks=account.getallprices()
+        return jsonify(NOTFOUND),404
+    json_list=[allstocks for allstocks in stocks]    
+    return jsonify({"username": account.username,"stocks":json_list})

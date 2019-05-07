@@ -42,3 +42,29 @@ def get_allprice():
     else:
         #raise requests.ConnectionError('http status: ' + format(response.status_code))
         return False
+
+def get_allpricesearch(searchby):
+    response = requests.get(SYMBOLS)
+    if response.status_code == 200:
+        pricelist=response.json()
+        pricelistname=[]
+        #newstr=""
+        # pricelistname=[]
+        # for p in pricelist:
+        #     pstr="Symbol: {}|Name: {}|Active: {}".format(str(p['symbol']),str(p['name']),str(p['isEnabled']))
+        #     pricelistname.append(pstr)        
+        for p in pricelist:
+            #newstr=str(p['symbol']).replace('"','*')
+            #newstr=str(newstr).strip()
+            if str(p['symbol']).startswith(str(searchby).upper()):
+                pstr={"ticker":p['symbol'],
+                  "stockname":p['name'],
+                  "isEnabled":p['isEnabled']}
+                pricelistname.append(pstr) 
+                #pricelistname.append(str(searchby).upper())              
+                     
+             
+        return pricelistname
+    else:
+        #raise requests.ConnectionError('http status: ' + format(response.status_code))
+        return False

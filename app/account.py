@@ -5,6 +5,7 @@ from app.orm import ORM
 from app.util import hash_pass
 from app.util import get_price
 from app.util import get_allprice
+from app.util import get_allpricesearch
 from app.position import Position
 from app.trade import Trade
 
@@ -124,6 +125,9 @@ class Account(ORM):
 
     def getallprices(self):
         return get_allprice()
+
+    def getallsearchprices(self,searchby):
+        return get_allpricesearch(searchby)
 
     def getprices(self,symbol):
         return get_price(symbol)
